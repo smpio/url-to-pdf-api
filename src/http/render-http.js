@@ -158,6 +158,7 @@ function getOptsFromQuery(query) {
     },
     pdf: {
       fullPage: query['pdf.fullPage'],
+      pageSelector: query['pdf.pageSelector'],
       scale: query['pdf.scale'],
       displayHeaderFooter: query['pdf.displayHeaderFooter'],
       footerTemplate: query['pdf.footerTemplate'],

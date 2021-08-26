@@ -196,6 +196,7 @@ pdf.format | string | `A4` | Paper format. If set, takes priority over width or 
 pdf.width | string | - | Paper width, accepts values labeled with units.
 pdf.height | string | - | Paper height, accepts values labeled with units.
 pdf.fullPage | boolean | - | Create PDF in a single page
+pdf.pageSelector | boolean | - | Selector for PDF height calculation
 pdf.margin.top | string | - | Top margin, accepts values labeled with units.
 pdf.margin.right | string | - | Right margin, accepts values labeled with units.
 pdf.margin.bottom | string | - | Bottom margin, accepts values labeled with units.

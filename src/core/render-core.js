@@ -38,6 +38,18 @@ async function getFullPageHeight(page) {
   return height;
 }
 
+async function getMaxPageHeight(page, selector) {
+  return await page.evaluate((selector) => {
+    return Math.max.apply(Math,
+      Array.from(document.querySelectorAll(selector)).map((node) => Math.max(
+        node.clientHeight,
+        node.scrollHeight,
+        node.offsetHeight,
+      ))
+    );
+  }, selector);
+}
+
 async function render(_opts = {}) {
   const opts = _.merge({
     cookies: [],
@@ -64,7 +76,7 @@ async function render(_opts = {}) {
     failEarly: false,
   }, _opts);
 
-  if ((_.get(_opts, 'pdf.width') && _.get(_opts, 'pdf.height')) || _.get(opts, 'pdf.fullPage')) {
+  if ((_.get(_opts, 'pdf.width') && _.get(_opts, 'pdf.height')) || _.get(opts, 'pdf.fullPage') || _.get(opts, 'pdf.pageSelector')) {
     // pdf.format always overrides width and height, so we must delete it
     // when user explicitly wants to set width and height
     opts.pdf.format = undefined;
@@ -172,9 +184,12 @@ async function render(_opts = {}) {
         const height = await getFullPageHeight(page);
         opts.pdf.height = height;
       }
+      if (opts.pdf.pageSelector) {
+        opts.pdf.height = await getMaxPageHeight(page, opts.pdf.pageSelector);
+      }
       data = await page.pdf(opts.pdf);
     } else if (opts.output === 'html') {
-      data = await page.evaluate(() => document.body.innerHTML);
+      data = await page.evaluate(() => document.documentElement.innerHTML);
     } else {
       // This is done because puppeteer throws an error if fullPage and clip is used at the same
       // time even though clip is just empty object {}
@@ -187,8 +202,9 @@ async function render(_opts = {}) {
         data = await page.screenshot(screenshotOpts);
       } else {
         const selElement = await page.$(opts.screenshot.selector);
+        const selectorScreenOpts = _.cloneDeep(_.omit(screenshotOpts, ['selector', 'fullPage']));
         if (!_.isNull(selElement)) {
-          data = await selElement.screenshot();
+          data = await selElement.screenshot(selectorScreenOpts);
         }
       }
     }
